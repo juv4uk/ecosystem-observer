@@ -1,4 +1,7 @@
 /target/
+/desktop/node_modules/
+/desktop/src-tauri/target/
+/desktop/dist/
 *.log
 .env
 .env.*

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WSM Ecosystem Observer</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">WSM · READ-ONLY REALITY VIEW</p>
+        <h1>Ecosystem Observer</h1>
+        <p class="subtitle">Спостереження ≠ судження · Unknown ≠ false</p>
+      </div>
+      <div class="actions">
+        <label class="auto-refresh"><input id="auto-refresh" type="checkbox" checked /> кожні 15 с</label>
+        <button id="refresh" type="button">Оновити snapshot</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="status-line" class="status-line" aria-live="polite">Очікування першого snapshot…</section>
+      <section id="summary" class="summary" aria-label="Короткий стан"></section>
+
+      <div class="layout">
+        <section class="main-column">
+          <div class="section-heading">
+            <div><p class="eyebrow">SOURCE: GIT</p><h2>Репозиторії</h2></div>
+            <input id="repo-filter" class="filter" type="search" placeholder="Фільтр репозиторіїв" />
+          </div>
+          <div id="repositories" class="stack"></div>
+
+          <div class="section-heading"><div><p class="eyebrow">SOURCE: OS + SELF-REPORT</p><h2>Живі сесії та процеси</h2></div></div>
+          <div id="processes" class="stack"></div>
+        </section>
+
+        <aside class="side-column">
+          <section class="panel"><p class="eyebrow">EXECUTABLE DIRECTORY</p><h2>Guard</h2><div id="guard"></div></section>
+          <section class="panel"><p class="eyebrow">PROCESS LIVENESS ONLY</p><h2>swarm-node</h2><div id="swarm"></div></section>
+          <section class="panel boundary">
+            <p class="eyebrow">EPISTEMIC BOUNDARY</p>
+            <h2>Що цей екран не стверджує</h2>
+            <ul>
+              <li>Dirty repo не означає помилку.</li>
+              <li>Legacy path не означає active authority.</li>
+              <li>Живий node не означає delivery.</li>
+              <li>Delivery не означає mesh convergence.</li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>
