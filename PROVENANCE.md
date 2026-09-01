@@ -3,7 +3,7 @@
 ## Аудит походження Ecosystem Observer
 
 Date / Дата: 2026-09-01
-Result / Результат: **PARTIAL-PASS WITH ONE DISCLOSED MIXED FRAGMENT**
+Result / Результат: **PASS — PREVIOUS MIXED FRAGMENT REPLACED**
 
 Цей аудит визначає, що можна чесно перенести з `juv4uk/tauricode` до
 `juv4uk/ecosystem` як canonical observer core. Він не є твердженням про
@@ -40,20 +40,19 @@ tauricode/crates/ecosystem-observer/
    locked Rust dependencies; точний перелік містить
    `THIRD-PARTY-NOTICES.md`.
 
-## Знайдений mixed fragment / Disclosed mixed fragment
+## Усунений mixed fragment / Replaced mixed fragment
 
-`src/git_read.rs` прямо документує, що `GIT_SAFETY_FLAGS` скопійовано з
-OpenCode `packages/opencode/src/git/index.ts`. Порівняння підтвердило однакову
-послідовність значень. Тому:
+Первинний аудит знайшов у `src/git_read.rs` послідовність `GIT_SAFETY_FLAGS`,
+скопійовану з OpenCode. Її видалено повністю. Замість неї незалежно визначено
+один bounded requirement observer-а: Git probes не повинні брати optional
+locks або refresh-ити index. Він виражений стандартною глобальною опцією Git
+`--no-optional-locks`; parsing шляхів уже використовує
+`status --porcelain=v1 -z`, тому додаткові platform policy overrides не
+потрібні.
 
-- весь observer не називається clean-room;
-- файл `git_read.rs` є mixed provenance;
-- upstream OpenCode MIT notice перенесено в `THIRD-PARTY-NOTICES.md`;
-- сумісна MIT-ліцензія дозволяє використання й розповсюдження зі збереженням
-  notice.
-
-Решта source не містить декларацій `copied from`/`derived from`; це позитивний,
-але не абсолютний доказ незалежного авторства.
+Після заміни source inspection не виявив інших декларацій `copied from` або
+`derived from`. Історичний audit record лишається в Git history, але поточний
+source більше не містить знайденого OpenCode fragment.
 
 ## Межі висновку / Limits
 
@@ -61,9 +60,9 @@ Git author, відсутність path в upstream і zero identifier matches �
 repository provenance, але математично не доводять, що жоден рядок ніколи не
 походив із невідомого зовнішнього джерела. Тому claim обмежений:
 
-> За доступною Git-історією та source inspection observer є оригінальною
-> роботою WSM, крім одного явно задокументованого MIT-сумісного фрагмента
-> OpenCode.
+> За доступною Git-історією, upstream comparison і source inspection поточний
+> observer є оригінальною роботою WSM; раніше знайдений OpenCode fragment
+> замінено незалежною мінімальною реалізацією.
 
 Якщо з'явиться нове джерело або суперечність, статус повертається до
 `UNRESOLVED`, а NOTICE оновлюється — факти сильніші за цей звіт.

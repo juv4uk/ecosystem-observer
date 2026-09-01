@@ -20,24 +20,13 @@ use std::path::Path;
 use std::process::{Command, Output, Stdio};
 use std::time::{Duration, Instant};
 
-/// Safety flags copied from `packages/opencode/src/git/index.ts` (OpenCode,
-/// MIT; see `../THIRD-PARTY-NOTICES.md`) — avoids optional-lock contention and cross-platform
-/// autocrlf/symlink/longpaths/quotepath surprises during read-only git
-/// invocations. Copied as a value, not imported: importing that module
-/// would pull in `effect`/`LayerNode`/`AppProcess` for a constant array.
-const GIT_SAFETY_FLAGS: &[&str] = &[
-    "--no-optional-locks",
-    "-c",
-    "core.autocrlf=false",
-    "-c",
-    "core.fsmonitor=false",
-    "-c",
-    "core.longpaths=true",
-    "-c",
-    "core.symlinks=true",
-    "-c",
-    "core.quotepath=false",
-];
+/// The observer needs one Git-wide constraint: read-only probes must not take
+/// optional locks or refresh the index. This is intentionally a single
+/// requirement derived from our own index-mtime experiment above, expressed
+/// with Git's standard global `--no-optional-locks` option. Path parsing uses
+/// `status --porcelain=v1 -z`, so it does not need quoting/autocrlf/symlink or
+/// platform policy overrides here.
+const GIT_READ_ONLY_OPTION: &str = "--no-optional-locks";
 
 /// Conservative default: long enough for a slow cold start (network-mounted
 /// filesystem, cold page cache on a large repo), short enough to fail a
@@ -112,7 +101,7 @@ fn run_git(path: &Path, args: &[&str]) -> Result<Output, String> {
     command
         .arg("-C")
         .arg(path)
-        .args(GIT_SAFETY_FLAGS)
+        .arg(GIT_READ_ONLY_OPTION)
         .args(args);
     run_with_timeout(command, GIT_PROBE_TIMEOUT)
 }
