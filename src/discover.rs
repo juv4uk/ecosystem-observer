@@ -5,6 +5,7 @@
 
 use crate::git_read::{self, RepoKind};
 use crate::identity_contract;
+use crate::operational::{observe_guard_reference, observe_swarm_nodes, OperationalSources};
 use crate::process_observe::{self, OsProcess};
 use crate::snapshot::{
     AgentProcess, EcosystemSnapshot, GitState, IdentityStatus, OsObservedFacts, ProbeFailure,
@@ -28,6 +29,11 @@ pub struct DiscoverInput {
     /// — for tests, so they never depend on (or race on) a real shared
     /// runtime directory; production callers should leave this `None`.
     pub identity_base_dir: Option<PathBuf>,
+    /// Optional, explicit operational source paths. `None` keeps the core
+    /// portable and reports no Guard snapshot instead of assuming a checkout
+    /// layout. Swarm process observation uses the same `/proc` pass as local
+    /// runtime observation and therefore needs no configured path.
+    pub operational_sources: Option<OperationalSources>,
 }
 
 pub fn discover_ecosystem(input: DiscoverInput) -> EcosystemSnapshot {
@@ -44,6 +50,11 @@ pub fn discover_ecosystem(input: DiscoverInput) -> EcosystemSnapshot {
         .identity_base_dir
         .unwrap_or_else(identity_contract::default_base_dir);
     let local_processes = gather_local_processes(&repositories, &identity_base_dir);
+    let guard = input
+        .operational_sources
+        .as_ref()
+        .map(observe_guard_reference);
+    let swarm_node = observe_swarm_nodes(&local_processes);
 
     let finished_at = iso8601_now();
     EcosystemSnapshot {
@@ -54,6 +65,8 @@ pub fn discover_ecosystem(input: DiscoverInput) -> EcosystemSnapshot {
         },
         repositories,
         local_processes,
+        guard,
+        swarm_node,
     }
 }
 

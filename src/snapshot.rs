@@ -208,9 +208,62 @@ pub struct AgentProcess {
     pub identity: SelfReportedIdentity,
 }
 
+/// Result of a bounded, read-only operational probe. `Unavailable` means the
+/// observer could not establish the fact; it is never silently converted to
+/// `false` or an empty successful result.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+pub enum ObservationStatus {
+    Complete,
+    Partial,
+    Unavailable,
+}
+
+/// Presence of a configured legacy Guard path is only a filesystem fact. It
+/// does not claim that the path is active, authoritative, or safe to delete.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
+pub struct LegacyPathObservation {
+    pub path: String,
+    pub exists: bool,
+}
+
+/// Read-only view of the executable Guard reference directory.
+///
+/// `topics` and `canonical_entry_point_present` are parsed observations from
+/// the configured source file, not a judgement about whether every ecosystem
+/// consumer has migrated to this Guard implementation.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
+pub struct GuardReferenceSnapshot {
+    pub source_path: String,
+    pub status: ObservationStatus,
+    pub topics: Vec<String>,
+    pub canonical_entry_point_present: Option<bool>,
+    pub legacy_paths: Vec<LegacyPathObservation>,
+    pub error: Option<String>,
+}
+
+/// One live process whose OS-observed command contains the bounded executable
+/// name `swarm-node`. No delivery or convergence claim is inferred from mere
+/// process liveness.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
+pub struct SwarmNodeInstance {
+    pub pid: u32,
+    pub command: String,
+    pub cwd: Option<String>,
+    pub started_at_observed: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
+pub struct SwarmNodeSnapshot {
+    pub status: ObservationStatus,
+    pub live_instances: Vec<SwarmNodeInstance>,
+    pub note: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 pub struct EcosystemSnapshot {
     pub scan: ScanMetadata,
     pub repositories: Vec<RepositorySnapshot>,
     pub local_processes: Vec<AgentProcess>,
+    pub guard: Option<GuardReferenceSnapshot>,
+    pub swarm_node: SwarmNodeSnapshot,
 }

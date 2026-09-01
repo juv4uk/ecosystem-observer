@@ -88,6 +88,7 @@ fn fresh_for_a_real_process_with_matching_token_and_recent_heartbeat() {
         root: root.path.clone(),
         repositories: Some(vec!["repo".to_string()]),
         identity_base_dir: Some(identity_dir.path.clone()),
+        operational_sources: None,
     });
 
     let process = snapshot
@@ -124,6 +125,7 @@ fn stale_for_a_real_process_with_matching_token_but_old_heartbeat() {
         root: root.path.clone(),
         repositories: Some(vec!["repo".to_string()]),
         identity_base_dir: Some(identity_dir.path.clone()),
+        operational_sources: None,
     });
 
     let process = snapshot
@@ -156,6 +158,7 @@ fn orphaned_when_a_real_processs_identity_file_has_a_mismatched_token() {
         root: root.path.clone(),
         repositories: Some(vec!["repo".to_string()]),
         identity_base_dir: Some(identity_dir.path.clone()),
+        operational_sources: None,
     });
 
     let process = snapshot
@@ -185,6 +188,7 @@ fn orphaned_when_identity_file_references_a_pid_that_was_never_real() {
         root: root.path.clone(),
         repositories: None,
         identity_base_dir: Some(identity_dir.path.clone()),
+        operational_sources: None,
     });
 
     let process = snapshot
@@ -220,6 +224,7 @@ fn not_found_for_a_real_relevant_process_with_no_identity_file_at_all() {
         root: root.path.clone(),
         repositories: Some(vec!["repo".to_string()]),
         identity_base_dir: Some(identity_dir.path.clone()),
+        operational_sources: None,
     });
 
     let process = snapshot
@@ -256,6 +261,7 @@ fn fresh_via_started_at_tolerance_fallback_when_process_start_token_absent() {
         root: root.path.clone(),
         repositories: Some(vec!["repo".to_string()]),
         identity_base_dir: Some(identity_dir.path.clone()),
+        operational_sources: None,
     });
 
     let process = snapshot

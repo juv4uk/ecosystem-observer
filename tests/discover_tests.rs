@@ -275,6 +275,7 @@ fn one_repository_failing_does_not_affect_the_others() {
             "repo-d".to_string(),
         ]),
         identity_base_dir: None,
+        operational_sources: None,
     });
 
     assert_eq!(snapshot.repositories.len(), 4);
@@ -313,6 +314,7 @@ fn auto_discovers_all_subdirectories_when_repositories_not_specified() {
         root: root.path.clone(),
         repositories: None,
         identity_base_dir: None,
+        operational_sources: None,
     });
 
     let mut names: Vec<&str> = snapshot
@@ -471,6 +473,7 @@ fn broken_symlink_in_auto_discovery_is_visible_not_hidden() {
         root: root.path.clone(),
         repositories: None,
         identity_base_dir: None,
+        operational_sources: None,
     });
 
     let names: Vec<&str> = snapshot

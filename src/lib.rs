@@ -43,6 +43,7 @@ mod contracts;
 mod discover;
 mod git_read;
 mod identity_contract;
+mod operational;
 mod process_observe;
 mod sexpr;
 mod snapshot;
@@ -53,10 +54,13 @@ pub use contracts::{
     parse_language_contract_version, ContractDrift, ContractError, ContractVersion,
 };
 pub use discover::{discover_ecosystem, scan_repository, DiscoverInput};
+pub use operational::OperationalSources;
 pub use process_observe::{read_start_token, OsProcess};
 pub use sexpr::{parse as parse_sexpr, Expr as SexprExpr, ParseError as SexprParseError};
 pub use snapshot::{
-    AgentProcess, EcosystemSnapshot, GitState, IdentityStatus, OsObservedFacts, ProbeFailure,
-    RemoteInfo, RepositorySnapshot, ScanMetadata, ScanStatus, SelfReportedIdentity,
+    AgentProcess, EcosystemSnapshot, GitState, GuardReferenceSnapshot, IdentityStatus,
+    LegacyPathObservation, ObservationStatus, OsObservedFacts, ProbeFailure, RemoteInfo,
+    RepositorySnapshot, ScanMetadata, ScanStatus, SelfReportedIdentity, SwarmNodeInstance,
+    SwarmNodeSnapshot,
 };
 pub use time_util::{iso8601_from_unix_seconds, iso8601_now};
