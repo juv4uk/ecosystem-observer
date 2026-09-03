@@ -1,0 +1,14 @@
+; tasks.my — durable task plan for ecosystem-observer (own top-level
+; repo, github.com/juv4uk/ecosystem-observer, actively touched
+; 2026-09-03).
+
+((tasks . (
+  ("ECOSYSTEM-OBSERVER-CLARIFY-RELATIONSHIP-TO-TAURICODE-CRATE" . (
+    (priority . 6.5)
+    (capabilities . (documentation rust ecosystem-tooling))
+    (origin . ecosystem-observer)
+    (context . "tauricode's own README describes 'ecosystem-observer (Rust crate, crates/ecosystem-observer/)' with the same name and same stated purpose (read-only Git repository snapshots, Complete/Partial/Failed observation semantics) as this standalone top-level repository. Both exist and both are live (this repo has a commit as recent as tauricode's own AGENTS.md update). tauricode's repo.my declares agent-workstation-ui + coordination-plane-adapters as its authority, which would include this observation surface.")
+    (description . "Determine and document whether this standalone repo is: (a) the canonical upstream source that tauricode vendors/imports as a crate, (b) an older/parallel copy that should be deprecated in favor of tauricode's crate, or (c) a genuinely independent tool with its own consumers. Do not silently pick one -- this is exactly the kind of cross-repo authority question the Guard cross-repo drift work (GUARD-CROSS-REPO-AUTHORITY-DRIFT) exists to catch; flag for the owner if genuinely ambiguous.")
+    (done . ())
+  ))
+)))
