@@ -71,3 +71,7 @@ observation != judgement
 unknown != false
 status -> source -> evidence
 ```
+
+## Ліцензія
+
+Цей твір поширюється під [ВОЛЬНІСТЮ](LICENSE) — простим словом про свободу творити, пам'ятаючи про волю іншого.
