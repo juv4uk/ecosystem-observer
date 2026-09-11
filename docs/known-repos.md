@@ -19,7 +19,7 @@ Compatibility is the pair `(language-contract, ISA-contract)` + tested SHAs — 
 
 | Repo | Role |
 |------|------|
-| **wsm-target-contract** | Neutral machine-readable **ABI contract** for the first x86_64 WSM target. Equal consumers: cml (emits) and wsm-os-lisp (runtime). Breaks the old CML ↔ wsm-os-lisp cycle. |
+| **wsm-target-contract** | Neutral machine-readable **ABI contract** for the first x86_64 WSM target. File: `target-contract.wsm` (schema `wsm-os-target-v1`, **version 4** as of 2026-09-11). Equal consumers: cml (emits) and wsm-os-lisp (runtime). Observer can parse declared version via `parse_wsm_target_contract_version`. |
 | **wsm-my-lisp** | Self-hosted WSM implementation (Lisp + assembler), growing independence from my-lisp's Rust bootstrap. Hosts the runtime DLL used by Cyberpunk. |
 | **wsm-os-lisp** | WSM-native Lisp machine / bare-metal integration research. |
 | **wsm-os** | Hardware-execution counterpart to wsm. |
@@ -47,6 +47,7 @@ Compatibility is the pair `(language-contract, ISA-contract)` + tested SHAs — 
 - Does not observe the Cyberpunk game process or RED4ext runtime state.
 - Does not treat presence of a repo as “healthy” or “complete”.
 - Does not invent roles for unknown directories under the scan root — unknown stays unknown.
+- Does not claim authority over ABI tag numbers; only reports the declared `version` when `target-contract.wsm` is readable.
 
 ## Related
 

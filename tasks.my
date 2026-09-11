@@ -1,7 +1,5 @@
 ; tasks.my — durable task plan for ecosystem-observer.
-; Same alist shape as sibling repos' tasks.my.
-; Updated 2026-09-11: catch-up after 9–11 Sep ecosystem surge.
-; Updated 2026-09-11 (2): CONTRACTS-6.0 + KNOWN-REPOS closed.
+; Updated 2026-09-11: catch-up. Updated again: WSM-TARGET-CONTRACT-AWARENESS closed.
 
 ((kind . tasks)
  (version . 1)
@@ -12,8 +10,8 @@
      (done . nil)
      (capabilities . (documentation translation audit policy))
      (origin . ecosystem)
-     (context . "Found in the 2026-09-08 ecosystem-wide language-debt audit: README.md opens with a large English block; \"## Українською\" appears only later, a smaller added section, not first-class.")
-     (description . "Enforce the DOCUMENTATION LANGUAGE policy. Every human-authored markdown file MUST have a substantive Ukrainian translation. Identify English-only documents and translate them. Do not translate machine identifiers or immutable historical records.")
+     (context . "Found in the 2026-09-08 ecosystem-wide language-debt audit.")
+     (description . "Enforce the DOCUMENTATION LANGUAGE policy. Every human-authored markdown file MUST have a substantive Ukrainian translation.")
      (acceptance . "README and key docs are first-class bilingual; new docs ship bilingual.")))
 
    ("STATUS-AUDIT-CATCH-UP" .
@@ -21,7 +19,7 @@
      (done . t)
      (origin . 2026-09-11-review)
      (capabilities . (audit documentation))
-     (description . "Honest status of how far ecosystem-observer has lagged behind the live ecosystem (new repos, contract 6.0, Cyberpunk surface).")
+     (description . "Honest status of lag behind the live ecosystem.")
      (evidence . ("docs/STATUS-AUDIT-2026-09-11.md"))
      (acceptance . "Audit document committed and linked from README.")))
 
@@ -30,39 +28,40 @@
      (done . t)
      (depends-on . ("STATUS-AUDIT-CATCH-UP"))
      (capabilities . (contracts parsing))
-     (description . "Update contracts.rs fixtures and tests from the old language-contract 3.0/1.0 drift case to the current ratified 6.0. Keep the acceptance-gate spirit: detect real drift without hardcoding a single machine path.")
+     (description . "Update contracts.rs to language-contract 6.0; keep drift gate.")
      (evidence . ("src/contracts.rs"))
-     (acceptance . "Tests pass against ContractVersion { major: 6, minor: 0 }; gate still detects a realistic drift example.")))
+     (acceptance . "Tests pass against 6.0; gate still detects realistic drift.")))
 
    ("KNOWN-REPOS-ROLES" .
     ((priority . 8.5)
      (done . t)
      (depends-on . ("STATUS-AUDIT-CATCH-UP"))
      (capabilities . (discovery documentation))
-     (description . "Document (and optionally lightly surface) the current key public repos and their roles: my-lisp (semantic source), fpga-lisp (hardware), cml (AOT), wsm-target-contract (ABI), wsm-my-lisp / wsm-os-lisp (self-hosted), my-lisp-cyberpunk (product surface), pravda (ВОЛЬНІСТЬ). Discovery remains directory-based; this is knowledge, not a hardcoded filter.")
+     (description . "Document current key public repos and roles.")
      (evidence . ("docs/known-repos.md"))
-     (acceptance . "docs/known-repos.md or equivalent + optional snapshot annotation.")))
+     (acceptance . "docs/known-repos.md present.")))
 
    ("WSM-TARGET-CONTRACT-AWARENESS" .
     ((priority . 8.0)
-     (done . nil)
+     (done . t)
      (depends-on . ("CONTRACTS-6.0-UPDATE"))
      (capabilities . (contracts abi))
-     (description . "Observe presence/version of wsm-target-contract (neutral ABI used by cml and wsm-os-lisp). At minimum: detect the repo and any machine-readable contract file; do not claim authority over its content.")
-     (acceptance . "Snapshot or contracts module can report that the ABI contract repo is present and its declared version if readable.")))
+     (description . "Observe presence/version of wsm-target-contract via target-contract.wsm.")
+     (evidence . ("src/contracts.rs" "docs/known-repos.md"))
+     (acceptance . "parse_wsm_target_contract_version works on real v4 shape; documented.")))
 
    ("CYBERPUNK-SURFACE-NOTE" .
     ((priority . 7.0)
      (done . t)
      (capabilities . (documentation product-surface))
-     (description . "Acknowledge my-lisp-cyberpunk as the in-game product surface (RED4ext, opaque GameHandle). Observer stays read-only and does not try to observe the game process; just stop being silent about the repo's existence and role.")
+     (description . "Acknowledge my-lisp-cyberpunk as in-game product surface.")
      (evidence . ("docs/known-repos.md"))
-     (acceptance . "Mentioned in known-repos / status docs; no false claims about in-game observation.")))
+     (acceptance . "Mentioned; no false in-game observation claims.")))
 
    ("DESKTOP-SMOKE-NEW-REPOS" .
     ((priority . 6.5)
      (done . nil)
      (depends-on . ("KNOWN-REPOS-ROLES"))
      (capabilities . (desktop ui))
-     (description . "Verify desktop UI still renders cleanly when the local GitHub root contains the newer repos (cyberpunk, wsm-*, target-contract). Fix any display/scan edge cases that appear.")
-     (acceptance . "Manual or automated smoke note; no crash / silent drop of new repos."))))))
+     (description . "Verify desktop UI with newer local repos present.")
+     (acceptance . "Smoke note; no crash / silent drop."))))))

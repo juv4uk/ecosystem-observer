@@ -1,33 +1,12 @@
-//! Typed parsing for `language-contract.my`/`ecosystem-status.my`, the
-//! first concrete deliverable of Stage 1 acceptance criteria's §3
-//! "Ecosystem contracts" (`ECO-DECISION-2026-08-19-TAURICODE-STAGE1-
-//! OBSERVER`), built on the `sexpr` reader landed as its own prior slice.
+//! Typed parsing for `language-contract.my`/`ecosystem-status.my`/`target-contract.wsm`,
+//! Stage 1 §3 "Ecosystem contracts" plus light ABI-contract awareness.
 //!
-//! That section names one **mandatory acceptance gate**: Stage 1 must
-//! independently reproduce, from the real files and without hardcoding
-//! the specific case, a conclusion like "`language-contract.my` (my-lisp)
-//! says one version while `ecosystem-status.my` still claims another".
-//! The gate test uses a portable fixture grounded in real content shapes.
+//! **Updated 2026-09-11:** language-contract fixtures at **6.0**; added
+//! `parse_wsm_target_contract_version` for the neutral ABI repo
+//! `wsm-target-contract` (`target-contract.wsm`, schema wsm-os-target-v1).
 //!
-//! **Updated 2026-09-11:** fixtures moved from the old 3.0/1.0 case to the
-//! current ratified language-contract **6.0** (owner ratification 2026-09-08).
-//! The drift gate still demonstrates detection of actual-vs-claimed mismatch.
-//!
-//! **Two alist conventions coexist in the ecosystem's own `.my` files,**
-//! and this module only speaks the second one:
-//! 1. `repo.my`'s space-separated tagged-list convention, e.g.
-//!    `(role agent-workstation)` — already handled by `Expr::assoc`/
-//!    `Expr::tagged_list` (a `List` whose head is the key symbol).
-//! 2. The classic dotted-pair alist convention used by
-//!    `language-contract.my`/`tasks.my`/`ecosystem-status.my`, e.g.
-//!    `(major . 6)`, `(as-of . "2026-09-08")` — this is an `Expr::
-//!    DottedList`, which `Expr::assoc` does **not** match (it calls
-//!    `as_list()`, which only matches `Expr::List`). `alist_get` below is
-//!    the dotted-pair counterpart.
-//!
-//! Out of scope here: `repo.my` typed parsing beyond existing helpers,
-//! `isa-contract.my`, `compatibility.my`, full `wsm-target-contract`
-//! parsing, wiring into `EcosystemSnapshot` (reader-only precedent).
+//! Observer does not claim authority over ABI numbers — only reports
+//! declared version when the file is readable.
 
 use crate::sexpr::{parse, Expr, ParseError};
 
@@ -44,9 +23,6 @@ impl From<ParseError> for ContractError {
     }
 }
 
-/// Dotted-pair alist lookup: finds `(key . value)` among `list`'s
-/// elements and returns `value`. Distinct from `Expr::assoc`'s
-/// space-list convention — see this module's doc comment.
 fn alist_get<'a>(list: &'a [Expr], key: &str) -> Option<&'a Expr> {
     list.iter().find_map(|item| match item {
         Expr::DottedList(head, tail) if head.len() == 1 && head[0].as_symbol() == Some(key) => {
@@ -63,10 +39,14 @@ fn as_integer(e: &Expr) -> Option<i64> {
     }
 }
 
-/// `(major, minor)` from `language-contract.my`'s own versioning axis —
-/// Level 1 (core semantics) + Level 2 (language contract) only, per that
-/// file's own doc comment; deliberately not Level 3 (ecosystem
-/// conformance), which changes independently and far more often.
+fn as_symbol_or_string(e: &Expr) -> Option<&str> {
+    e.as_symbol()
+        .or_else(|| match e {
+            Expr::String(s) => Some(s.as_str()),
+            _ => None,
+        })
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ContractVersion {
     pub major: i64,
@@ -79,9 +59,25 @@ impl std::fmt::Display for ContractVersion {
     }
 }
 
-/// Parses a `language-contract.my`-shaped file: a single top-level
-/// dotted-pair alist with `(major . N)` and `(minor . N)` entries, e.g.
-/// `((major . 6) (minor . 0) (note . "...") ...)`.
+/// Declared version of `wsm-target-contract` / `target-contract.wsm`.
+/// Integer `version` field (currently 4), plus schema string when present.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WsmTargetContractVersion {
+    pub version: i64,
+    pub schema: Option<String>,
+    pub architecture: Option<String>,
+}
+
+impl std::fmt::Display for WsmTargetContractVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "v{}", self.version)?;
+        if let Some(ref s) = self.schema {
+            write!(f, " ({s})")?;
+        }
+        Ok(())
+    }
+}
+
 pub fn parse_language_contract_version(content: &str) -> Result<ContractVersion, ContractError> {
     let exprs = parse(content)?;
     let root = exprs.first().ok_or(ContractError::MissingField("<root>"))?;
@@ -97,11 +93,6 @@ pub fn parse_language_contract_version(content: &str) -> Result<ContractVersion,
     Ok(ContractVersion { major, minor })
 }
 
-/// Parses `ecosystem-status.my`'s claim about `repo_name`'s
-/// `language-contract` version: `(repositories . ((<repo_name> .
-/// ((language-contract . (MAJOR MINOR)) ...)) ...))`. This is the
-/// **claimed** version — what the snapshot file says, not what
-/// `language-contract.my` itself actually says.
 pub fn parse_claimed_language_contract_version(
     ecosystem_status_content: &str,
     repo_name: &str,
@@ -139,10 +130,30 @@ pub fn parse_claimed_language_contract_version(
     Ok(ContractVersion { major, minor })
 }
 
-/// A drift between `language-contract.my`'s real version and what
-/// `ecosystem-status.my` claims for the same repository. `None` from
-/// `detect_language_contract_drift` means the two agree — not that no
-/// comparison was made.
+/// Parses `target-contract.wsm` from `wsm-target-contract`:
+/// `((kind . wsm-os-target-contract) (schema . "wsm-os-target-v1") (version . 4) ...)`.
+pub fn parse_wsm_target_contract_version(
+    content: &str,
+) -> Result<WsmTargetContractVersion, ContractError> {
+    let exprs = parse(content)?;
+    let root = exprs.first().ok_or(ContractError::MissingField("<root>"))?;
+    let items = root
+        .as_list()
+        .ok_or(ContractError::WrongShape("<root> is not a list"))?;
+    let version = alist_get(items, "version")
+        .and_then(as_integer)
+        .ok_or(ContractError::MissingField("version"))?;
+    let schema = alist_get(items, "schema").and_then(as_symbol_or_string).map(str::to_string);
+    let architecture = alist_get(items, "architecture")
+        .and_then(as_symbol_or_string)
+        .map(str::to_string);
+    Ok(WsmTargetContractVersion {
+        version,
+        schema,
+        architecture,
+    })
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContractDrift {
     pub repo: String,
@@ -172,7 +183,6 @@ mod tests {
 
     #[test]
     fn parses_language_contract_version_6_0() {
-        // Shape taken from the live my-lisp language-contract.my (6.0, 2026-09-08).
         let v = parse_language_contract_version(
             r#"((major . 6) (minor . 0) (note . "RATIFIED by owner 2026-09-08.") (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3)))"#,
         )
@@ -223,16 +233,11 @@ mod tests {
         assert_eq!(drift.claimed, claimed);
     }
 
-    /// Acceptance gate: independently detect actual-vs-claimed mismatch.
-    /// Fixture uses current 6.0 shape for actual, and a deliberately stale
-    /// claim (5.0) so the gate still exercises drift detection without
-    /// depending on a machine-local path or a currently-live ecosystem-status
-    /// file that may already have been updated.
     #[test]
     fn gate_detects_real_drift_case() {
         let language_contract_my = r#"
             ((major . 6) (minor . 0)
-             (note . "RATIFIED by owner 2026-09-08. Contract 6.0 makes Canon 0+7 program resolution genuinely immutable.")
+             (note . "RATIFIED by owner 2026-09-08.")
              (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3)))
         "#;
         let ecosystem_status_my = r#"
@@ -250,13 +255,35 @@ mod tests {
             parse_claimed_language_contract_version(ecosystem_status_my, "my-lisp").unwrap();
         let drift = detect_language_contract_drift("my-lisp", actual, claimed);
 
-        assert!(
-            drift.is_some(),
-            "acceptance gate failed: expected language-contract.my (6.0) vs \
-             ecosystem-status.my's claim (5.0) to be detected as drift"
-        );
+        assert!(drift.is_some());
         let drift = drift.unwrap();
         assert_eq!(drift.actual, ContractVersion { major: 6, minor: 0 });
         assert_eq!(drift.claimed, ContractVersion { major: 5, minor: 0 });
+    }
+
+    /// Real shape from wsm-target-contract/target-contract.wsm (version 4).
+    #[test]
+    fn parses_wsm_target_contract_version_4() {
+        let content = r#"
+            ((kind . wsm-os-target-contract)
+             (schema . "wsm-os-target-v1")
+             (version . 4)
+             (architecture . x86_64)
+             (endianness . little)
+             (word . ((bits . 64) (tag-bits . 3)))
+             (tags . ((cons . 0) (nil . 1) (true . 2) (boxed . 7)))
+             (boxed . ((kinds-defined-so-far . (string game-handle)))))
+        "#;
+        let v = parse_wsm_target_contract_version(content).unwrap();
+        assert_eq!(v.version, 4);
+        assert_eq!(v.schema.as_deref(), Some("wsm-os-target-v1"));
+        assert_eq!(v.architecture.as_deref(), Some("x86_64"));
+    }
+
+    #[test]
+    fn wsm_target_missing_version_is_error() {
+        let content = r#"((kind . wsm-os-target-contract) (schema . "wsm-os-target-v1"))"#;
+        let err = parse_wsm_target_contract_version(content).unwrap_err();
+        assert_eq!(err, ContractError::MissingField("version"));
     }
 }
