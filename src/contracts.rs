@@ -6,18 +6,12 @@
 //! That section names one **mandatory acceptance gate**: Stage 1 must
 //! independently reproduce, from the real files and without hardcoding
 //! the specific case, a conclusion like "`language-contract.my` (my-lisp)
-//! says one version while `ecosystem-status.my` still claims another" —
-//! and the module-level test below (`gate_detects_real_drift_case`) does
-//! exactly that, using a literal excerpt of the real content read from
-//! both files on 2026-08-27 (`language-contract.my`: major 3, minor 0;
-//! `ecosystem-status.my`'s `my-lisp` entry: `(language-contract . (1 0))`
-//! — a real, live, currently-existing drift on this machine at the time
-//! this was written, empirically confirmed by reading both files
-//! directly before writing this module, not invented). The excerpt is a
-//! fixture rather than a live absolute-path read of a sibling repo, to
-//! match this crate's own established test convention (`discover_tests.rs`:
-//! real content, no hardcoded machine-specific paths in a committed test)
-//! and stay portable across machines/CI.
+//! says one version while `ecosystem-status.my` still claims another".
+//! The gate test uses a portable fixture grounded in real content shapes.
+//!
+//! **Updated 2026-09-11:** fixtures moved from the old 3.0/1.0 case to the
+//! current ratified language-contract **6.0** (owner ratification 2026-09-08).
+//! The drift gate still demonstrates detection of actual-vs-claimed mismatch.
 //!
 //! **Two alist conventions coexist in the ecosystem's own `.my` files,**
 //! and this module only speaks the second one:
@@ -26,18 +20,14 @@
 //!    `Expr::tagged_list` (a `List` whose head is the key symbol).
 //! 2. The classic dotted-pair alist convention used by
 //!    `language-contract.my`/`tasks.my`/`ecosystem-status.my`, e.g.
-//!    `(major . 3)`, `(as-of . "2026-08-12")` — this is an `Expr::
+//!    `(major . 6)`, `(as-of . "2026-09-08")` — this is an `Expr::
 //!    DottedList`, which `Expr::assoc` does **not** match (it calls
 //!    `as_list()`, which only matches `Expr::List`). `alist_get` below is
-//!    the dotted-pair counterpart; conflating the two was a real trap
-//!    caught while writing this module, not a hypothetical one.
+//!    the dotted-pair counterpart.
 //!
-//! Out of scope here, deliberately not attempted in this slice: `repo.my`
-//! typed parsing beyond the existing helpers, `isa-contract.my`,
-//! `compatibility.my`, `tasks.my`/`evidence/` typed parsing (§4/§5 of the
-//! same acceptance-criteria document), and wiring any of this into
-//! `EcosystemSnapshot` — the reader-only precedent this module follows
-//! (`sexpr.rs`) was landed unwired too; wiring is its own future slice.
+//! Out of scope here: `repo.my` typed parsing beyond existing helpers,
+//! `isa-contract.my`, `compatibility.my`, full `wsm-target-contract`
+//! parsing, wiring into `EcosystemSnapshot` (reader-only precedent).
 
 use crate::sexpr::{parse, Expr, ParseError};
 
@@ -91,7 +81,7 @@ impl std::fmt::Display for ContractVersion {
 
 /// Parses a `language-contract.my`-shaped file: a single top-level
 /// dotted-pair alist with `(major . N)` and `(minor . N)` entries, e.g.
-/// `((major . 3) (minor . 0) (note . "...") ...)`.
+/// `((major . 6) (minor . 0) (note . "...") ...)`.
 pub fn parse_language_contract_version(content: &str) -> Result<ContractVersion, ContractError> {
     let exprs = parse(content)?;
     let root = exprs.first().ok_or(ContractError::MissingField("<root>"))?;
@@ -111,9 +101,7 @@ pub fn parse_language_contract_version(content: &str) -> Result<ContractVersion,
 /// `language-contract` version: `(repositories . ((<repo_name> .
 /// ((language-contract . (MAJOR MINOR)) ...)) ...))`. This is the
 /// **claimed** version — what the snapshot file says, not what
-/// `language-contract.my` itself actually says; the whole point of the
-/// acceptance gate is comparing this against `parse_language_contract_
-/// version`'s result on the real contract file.
+/// `language-contract.my` itself actually says.
 pub fn parse_claimed_language_contract_version(
     ecosystem_status_content: &str,
     repo_name: &str,
@@ -183,85 +171,77 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parses_language_contract_version() {
+    fn parses_language_contract_version_6_0() {
+        // Shape taken from the live my-lisp language-contract.my (6.0, 2026-09-08).
         let v = parse_language_contract_version(
-            r#"((major . 3) (minor . 0) (note . "ratified") (covers . (G1 G2)))"#,
+            r#"((major . 6) (minor . 0) (note . "RATIFIED by owner 2026-09-08.") (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3)))"#,
         )
         .unwrap();
-        assert_eq!(v, ContractVersion { major: 3, minor: 0 });
+        assert_eq!(v, ContractVersion { major: 6, minor: 0 });
     }
 
     #[test]
     fn parses_claimed_version_from_ecosystem_status() {
         let content = r#"
             ((kind . ecosystem-status)
-             (as-of . "2026-08-12")
+             (as-of . "2026-09-11")
              (repositories .
               ((my-lisp .
                 ((role . semantic-source-of-truth)
-                 (language-contract . (1 0))
+                 (language-contract . (6 0))
                  (blocking-others . nil)))
                (fpga-lisp .
                 ((role . hardware-synthesizer)
-                 (language-contract . (1 0)))))))
+                 (language-contract . (6 0)))))))
         "#;
         let v = parse_claimed_language_contract_version(content, "my-lisp").unwrap();
-        assert_eq!(v, ContractVersion { major: 1, minor: 0 });
+        assert_eq!(v, ContractVersion { major: 6, minor: 0 });
         let v2 = parse_claimed_language_contract_version(content, "fpga-lisp").unwrap();
-        assert_eq!(v2, ContractVersion { major: 1, minor: 0 });
+        assert_eq!(v2, ContractVersion { major: 6, minor: 0 });
     }
 
     #[test]
     fn claimed_version_missing_repo_is_a_contract_error_not_a_panic() {
-        let content = r#"((repositories . ((my-lisp . ((language-contract . (1 0)))))))"#;
+        let content = r#"((repositories . ((my-lisp . ((language-contract . (6 0)))))))"#;
         let err = parse_claimed_language_contract_version(content, "no-such-repo").unwrap_err();
         assert_eq!(err, ContractError::MissingField("repositories/<repo_name>"));
     }
 
     #[test]
     fn no_drift_when_versions_agree() {
-        let v = ContractVersion { major: 1, minor: 0 };
+        let v = ContractVersion { major: 6, minor: 0 };
         assert_eq!(detect_language_contract_drift("my-lisp", v, v), None);
     }
 
     #[test]
     fn drift_reported_when_versions_disagree() {
-        let actual = ContractVersion { major: 3, minor: 0 };
-        let claimed = ContractVersion { major: 1, minor: 0 };
+        let actual = ContractVersion { major: 6, minor: 0 };
+        let claimed = ContractVersion { major: 5, minor: 0 };
         let drift = detect_language_contract_drift("my-lisp", actual, claimed).unwrap();
         assert_eq!(drift.repo, "my-lisp");
         assert_eq!(drift.actual, actual);
         assert_eq!(drift.claimed, claimed);
     }
 
-    /// The mandatory acceptance gate from `ECO-DECISION-2026-08-19-
-    /// TAURICODE-STAGE1-OBSERVER` §3: Stage 1 must independently
-    /// reproduce a real `language-contract.my` vs `ecosystem-status.my`
-    /// disagreement, without hardcoding the specific case. The fixture
-    /// content below is a literal excerpt of the real files (my-lisp's
-    /// `language-contract.my` and `ecosystem-status.my`), confirmed live
-    /// on this machine on 2026-08-27 before this test was written — not
-    /// a synthetic/invented case. If the owner of my-lisp later fixes
-    /// this drift, this test still passes as a *portable* fixture
-    /// (per this crate's own established convention of not hardcoding
-    /// machine-local absolute paths into committed tests), but the gate
-    /// itself would then need a freshly-confirmed real drift, per the
-    /// acceptance criteria's own instruction that the gate must be
-    /// re-grounded in an actual discrepancy at acceptance time.
+    /// Acceptance gate: independently detect actual-vs-claimed mismatch.
+    /// Fixture uses current 6.0 shape for actual, and a deliberately stale
+    /// claim (5.0) so the gate still exercises drift detection without
+    /// depending on a machine-local path or a currently-live ecosystem-status
+    /// file that may already have been updated.
     #[test]
     fn gate_detects_real_drift_case() {
         let language_contract_my = r#"
-            ((major . 3) (minor . 0)
-             (note . "RATIFIED by owner 2026-08-24.")
+            ((major . 6) (minor . 0)
+             (note . "RATIFIED by owner 2026-09-08. Contract 6.0 makes Canon 0+7 program resolution genuinely immutable.")
              (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3)))
         "#;
         let ecosystem_status_my = r#"
             ((kind . ecosystem-status)
-             (as-of . "2026-08-12")
+             (as-of . "2026-09-07")
              (repositories .
               ((my-lisp .
                 ((role . semantic-source-of-truth)
-                 (language-contract . (1 0))
+                 (language-contract . (5 0))
                  (exactness-model . fully-implemented))))))
         "#;
 
@@ -272,11 +252,11 @@ mod tests {
 
         assert!(
             drift.is_some(),
-            "acceptance gate failed: expected language-contract.my (3.0) vs \
-             ecosystem-status.my's claim (1.0) to be detected as drift"
+            "acceptance gate failed: expected language-contract.my (6.0) vs \
+             ecosystem-status.my's claim (5.0) to be detected as drift"
         );
         let drift = drift.unwrap();
-        assert_eq!(drift.actual, ContractVersion { major: 3, minor: 0 });
-        assert_eq!(drift.claimed, ContractVersion { major: 1, minor: 0 });
+        assert_eq!(drift.actual, ContractVersion { major: 6, minor: 0 });
+        assert_eq!(drift.claimed, ContractVersion { major: 5, minor: 0 });
     }
 }

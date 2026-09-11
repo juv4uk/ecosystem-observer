@@ -42,10 +42,12 @@ Tauricode is **not** part of this app and is not modified by its development.
 
 ## Status (2026-09-11)
 
-The core still works. The ecosystem moved faster than this repo after 8 September (language-contract **6.0**, `wsm-target-contract`, `my-lisp-cyberpunk`, expanded WSM self-hosted line). Honest lag assessment and catch-up tasks:
+Catch-up in progress after the 9–11 September ecosystem surge:
 
-- [`docs/STATUS-AUDIT-2026-09-11.md`](docs/STATUS-AUDIT-2026-09-11.md)
-- [`tasks.my`](tasks.my)
+- Audit: [`docs/STATUS-AUDIT-2026-09-11.md`](docs/STATUS-AUDIT-2026-09-11.md)
+- Known repos & roles: [`docs/known-repos.md`](docs/known-repos.md)
+- Contracts module updated to language-contract **6.0**
+- Tasks: [`tasks.my`](tasks.my)
 
 ---
 
@@ -55,7 +57,7 @@ The core still works. The ecosystem moved faster than this repo after 8 Septembe
 
 Код перенесено з `juv4uk/tauricode` через coordination repo зі збереженням походження — [`PROVENANCE.md`](PROVENANCE.md).
 
-**Статус 2026-09-11:** ядро працює, але після 8 вересня екосистема пішла вперед швидше (контракт 6.0, Cyberpunk-поверхня, ABI-контракт). Аудит відставання і задачі на підтягування — у `docs/STATUS-AUDIT-2026-09-11.md` та `tasks.my`.
+**Статус 2026-09-11:** підтягування після стрибка екосистеми 9–11 вересня. Аудит — `docs/STATUS-AUDIT-2026-09-11.md`, ролі репо — `docs/known-repos.md`, контракти оновлені до **6.0**.
 
 ---
 

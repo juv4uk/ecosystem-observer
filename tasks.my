@@ -1,7 +1,7 @@
 ; tasks.my — durable task plan for ecosystem-observer.
 ; Same alist shape as sibling repos' tasks.my.
-; Updated 2026-09-11: catch-up after 9–11 Sep ecosystem surge
-; (my-lisp-cyberpunk, wsm-target-contract, language-contract 6.0).
+; Updated 2026-09-11: catch-up after 9–11 Sep ecosystem surge.
+; Updated 2026-09-11 (2): CONTRACTS-6.0 + KNOWN-REPOS closed.
 
 ((kind . tasks)
  (version . 1)
@@ -27,18 +27,20 @@
 
    ("CONTRACTS-6.0-UPDATE" .
     ((priority . 9.0)
-     (done . nil)
+     (done . t)
      (depends-on . ("STATUS-AUDIT-CATCH-UP"))
      (capabilities . (contracts parsing))
      (description . "Update contracts.rs fixtures and tests from the old language-contract 3.0/1.0 drift case to the current ratified 6.0. Keep the acceptance-gate spirit: detect real drift without hardcoding a single machine path.")
+     (evidence . ("src/contracts.rs"))
      (acceptance . "Tests pass against ContractVersion { major: 6, minor: 0 }; gate still detects a realistic drift example.")))
 
    ("KNOWN-REPOS-ROLES" .
     ((priority . 8.5)
-     (done . nil)
+     (done . t)
      (depends-on . ("STATUS-AUDIT-CATCH-UP"))
      (capabilities . (discovery documentation))
      (description . "Document (and optionally lightly surface) the current key public repos and their roles: my-lisp (semantic source), fpga-lisp (hardware), cml (AOT), wsm-target-contract (ABI), wsm-my-lisp / wsm-os-lisp (self-hosted), my-lisp-cyberpunk (product surface), pravda (ВОЛЬНІСТЬ). Discovery remains directory-based; this is knowledge, not a hardcoded filter.")
+     (evidence . ("docs/known-repos.md"))
      (acceptance . "docs/known-repos.md or equivalent + optional snapshot annotation.")))
 
    ("WSM-TARGET-CONTRACT-AWARENESS" .
@@ -51,9 +53,10 @@
 
    ("CYBERPUNK-SURFACE-NOTE" .
     ((priority . 7.0)
-     (done . nil)
+     (done . t)
      (capabilities . (documentation product-surface))
      (description . "Acknowledge my-lisp-cyberpunk as the in-game product surface (RED4ext, opaque GameHandle). Observer stays read-only and does not try to observe the game process; just stop being silent about the repo's existence and role.")
+     (evidence . ("docs/known-repos.md"))
      (acceptance . "Mentioned in known-repos / status docs; no false claims about in-game observation.")))
 
    ("DESKTOP-SMOKE-NEW-REPOS" .
