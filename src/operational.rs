@@ -3,12 +3,16 @@
 //! This module deliberately observes sources and live processes only. It does
 //! not turn a reference topic into an architectural verdict, and it does not
 //! turn a running process into delivery or mesh-convergence evidence.
+//!
+//! Guard reference path resolution accepts equal surface spellings
+//! `.wsm` ↔ `.всм` (owner 2026-09-10) via `surface_ext::resolve_existing_surface_path`.
 
 use crate::sexpr::{self, Expr};
 use crate::snapshot::{
     AgentProcess, GuardReferenceSnapshot, LegacyPathObservation, ObservationStatus,
     SwarmNodeInstance, SwarmNodeSnapshot,
 };
+use crate::surface_ext::resolve_existing_surface_path;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -21,14 +25,19 @@ pub(crate) fn observe_guard_reference(sources: &OperationalSources) -> GuardRefe
     let legacy_paths = sources
         .legacy_guard_paths
         .iter()
-        .map(|path| LegacyPathObservation {
-            path: path.display().to_string(),
-            exists: path.exists(),
+        .map(|path| {
+            let resolved = resolve_existing_surface_path(path);
+            LegacyPathObservation {
+                path: resolved.display().to_string(),
+                exists: resolved.exists(),
+            }
         })
         .collect();
-    let source_path = sources.guard_reference_path.display().to_string();
 
-    let text = match std::fs::read_to_string(&sources.guard_reference_path) {
+    let resolved = resolve_existing_surface_path(&sources.guard_reference_path);
+    let source_path = resolved.display().to_string();
+
+    let text = match std::fs::read_to_string(&resolved) {
         Ok(text) => text,
         Err(error) => {
             return GuardReferenceSnapshot {
@@ -178,6 +187,33 @@ mod tests {
     }
 
     #[test]
+    fn guard_reference_resolves_cyrillic_vsm_twin() {
+        let root = std::env::temp_dir().join(format!(
+            "ecosystem-observer-guard-vsm-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        let preferred_latin = root.join("guard-reference.wsm");
+        let cyrillic = root.join("guard-reference.всм");
+        std::fs::write(
+            &cyrillic,
+            "(references (entry (topic task-freshness)))\n(def guard-ask (lambda (name) name))\n",
+        )
+        .unwrap();
+
+        let snapshot = observe_guard_reference(&OperationalSources {
+            guard_reference_path: preferred_latin,
+            legacy_guard_paths: Vec::new(),
+        });
+
+        assert_eq!(snapshot.status, ObservationStatus::Complete);
+        assert!(snapshot.source_path.ends_with("guard-reference.всм"));
+        assert_eq!(snapshot.canonical_entry_point_present, Some(true));
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
     fn missing_guard_reference_is_unavailable_not_empty_success() {
         let snapshot = observe_guard_reference(&OperationalSources {
             guard_reference_path: PathBuf::from("/definitely/missing/guard-reference.wsm"),
@@ -206,9 +242,6 @@ mod tests {
         assert!(snapshot.note.contains("convergence"));
     }
 
-    /// Optional live-source gate. CI has no sibling my-lisp checkout, so the
-    /// path is supplied explicitly when an ecosystem integration witness is
-    /// required instead of being hardcoded into the portable crate.
     #[test]
     fn configured_live_guard_reference_is_parseable() {
         let Some(path) = std::env::var_os("ECOSYSTEM_GUARD_REFERENCE") else {

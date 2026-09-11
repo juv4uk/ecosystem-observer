@@ -1,69 +1,41 @@
 ; tasks.my — durable task plan for ecosystem-observer.
-; Catch-up 2026-09-11 complete including desktop default list code fix.
 
 ((kind . tasks)
  (version . 1)
  (goal . "Read-only observation of the real WSM/my-lisp ecosystem without inventing authority.")
  (tasks .
   (("BILINGUAL-DOCUMENTATION-AUDIT" .
-    ((priority . 9.0)
-     (done . t)
-     (capabilities . (documentation translation audit policy))
-     (origin . ecosystem)
-     (context . "2026-09-08 language-debt audit + 2026-09-11 catch-up docs.")
-     (description . "Key catch-up docs made first-class bilingual.")
-     (evidence . ("docs/STATUS-AUDIT-2026-09-11.md" "docs/known-repos.md" "README.md" "desktop/README.md"))
-     (acceptance . "Primary human docs for this catch-up are bilingual.")))
-
+    ((priority . 9.0) (done . t)
+     (evidence . ("docs/STATUS-AUDIT-2026-09-11.md" "docs/known-repos.md" "README.md"))
+     (description . "Key catch-up docs bilingual.")))
    ("STATUS-AUDIT-CATCH-UP" .
-    ((priority . 9.5)
-     (done . t)
-     (origin . 2026-09-11-review)
-     (capabilities . (audit documentation))
-     (description . "Honest status of lag behind the live ecosystem.")
+    ((priority . 9.5) (done . t)
      (evidence . ("docs/STATUS-AUDIT-2026-09-11.md"))
-     (acceptance . "Audit document committed and linked from README.")))
-
+     (description . "Lag audit.")))
    ("CONTRACTS-6.0-UPDATE" .
-    ((priority . 9.0)
-     (done . t)
-     (depends-on . ("STATUS-AUDIT-CATCH-UP"))
-     (capabilities . (contracts parsing))
-     (description . "Update contracts.rs to language-contract 6.0; keep drift gate.")
+    ((priority . 9.0) (done . t)
      (evidence . ("src/contracts.rs"))
-     (acceptance . "Tests pass against 6.0; gate still detects realistic drift.")))
-
+     (description . "language-contract 6.0.")))
    ("KNOWN-REPOS-ROLES" .
-    ((priority . 8.5)
-     (done . t)
-     (depends-on . ("STATUS-AUDIT-CATCH-UP"))
-     (capabilities . (discovery documentation))
-     (description . "Document current key public repos and roles.")
+    ((priority . 8.5) (done . t)
      (evidence . ("docs/known-repos.md"))
-     (acceptance . "docs/known-repos.md present.")))
-
+     (description . "Repo roles.")))
    ("WSM-TARGET-CONTRACT-AWARENESS" .
-    ((priority . 8.0)
-     (done . t)
-     (depends-on . ("CONTRACTS-6.0-UPDATE"))
-     (capabilities . (contracts abi))
-     (description . "Observe presence/version of wsm-target-contract via target-contract.wsm.")
-     (evidence . ("src/contracts.rs" "docs/known-repos.md"))
-     (acceptance . "parse_wsm_target_contract_version works on real v4 shape; documented.")))
-
+    ((priority . 8.0) (done . t)
+     (evidence . ("src/contracts.rs"))
+     (description . "ABI v4 parse.")))
    ("CYBERPUNK-SURFACE-NOTE" .
-    ((priority . 7.0)
-     (done . t)
-     (capabilities . (documentation product-surface))
-     (description . "Acknowledge my-lisp-cyberpunk as in-game product surface.")
+    ((priority . 7.0) (done . t)
      (evidence . ("docs/known-repos.md"))
-     (acceptance . "Mentioned; no false in-game observation claims.")))
-
+     (description . "Cyberpunk surface noted.")))
    ("DESKTOP-SMOKE-NEW-REPOS" .
-    ((priority . 6.5)
-     (done . t)
-     (depends-on . ("KNOWN-REPOS-ROLES"))
-     (capabilities . (desktop ui code))
-     (description . "DEFAULT_REPOSITORIES in snapshot_command.rs was silently dropping post-surge repos. Updated list + unit test.")
+    ((priority . 6.5) (done . t)
      (evidence . ("desktop/src-tauri/src/snapshot_command.rs"))
-     (acceptance . "Defaults include cyberpunk, wsm-target-contract, wsm-my-lisp, wsm-os-lisp; test defaults_include_post_surge_critical_repos."))))))
+     (description . "DEFAULT_REPOSITORIES fixed.")))
+   ("SURFACE-EXT-CYRILLIC" .
+    ((priority . 9.0) (done . t)
+     (origin . owner-2026-09-10)
+     (capabilities . (surface spelling utf-8))
+     (description . "Issue #1: equal .my/.мій .wsm/.всм .lisp/.лісп; resolve twin paths; Unicode fixtures.")
+     (evidence . ("src/surface_ext.rs" "src/operational.rs" "fixtures/" "docs/surface-extensions.md"))
+     (acceptance . "Latin paths still work; Cyrillic twin resolves when Latin missing; UTF-8 names not rejected."))))))

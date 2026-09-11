@@ -1,17 +1,12 @@
 //! `ecosystem-observer` — observer core for the my-lisp ecosystem.
 //!
-//! Slice 1 (repository discovery + read-only git scanning), per
-//! `ECO-DECISION-2026-08-19-TAURICODE-STAGE1-OBSERVER`.
-//!
+//! Slice 1: repository discovery + read-only git scanning.
 //! Slice 2: local runtime observation + agent identity contract.
+//! `sexpr` / `contracts`: S-expression reader and typed contract parsing
+//! (language-contract **6.0**, `wsm-target-contract` v4).
+//! `surface_ext` (2026-09-11): equal `.my`/`.мій`, `.wsm`/`.всм`, `.lisp`/`.лісп`.
 //!
-//! `sexpr` / `contracts`: S-expression reader and typed contract parsing.
-//! **2026-09-11:** language-contract **6.0** fixtures; `parse_wsm_target_contract_version`
-//! for neutral ABI repo `wsm-target-contract` (`target-contract.wsm`).
-//!
-//! Every operation is read-only. Nothing writes to a repository, claims a
-//! task, signals a process, or launches anything other than read-only
-//! `git` / `getconf` plumbing.
+//! Every operation is read-only.
 
 mod contracts;
 mod discover;
@@ -21,6 +16,7 @@ mod operational;
 mod process_observe;
 mod sexpr;
 mod snapshot;
+mod surface_ext;
 mod time_util;
 
 pub use contracts::{
@@ -37,5 +33,8 @@ pub use snapshot::{
     LegacyPathObservation, ObservationStatus, OsObservedFacts, ProbeFailure, RemoteInfo,
     RepositorySnapshot, ScanMetadata, ScanStatus, SelfReportedIdentity, SwarmNodeInstance,
     SwarmNodeSnapshot,
+};
+pub use surface_ext::{
+    alternate_extension, is_ecosystem_surface_ext, resolve_existing_surface_path,
 };
 pub use time_util::{iso8601_from_unix_seconds, iso8601_now};
