@@ -3,17 +3,38 @@ use ecosystem_observer::{
 };
 use std::path::{Path, PathBuf};
 
-const DEFAULT_REPOSITORIES: [&str; 10] = [
+/// Default scan list when `ECOSYSTEM_REPOS` is unset.
+/// Knowledge list aligned with docs/known-repos.md (2026-09-11).
+/// Not an authority claim — only which local checkouts the desktop
+/// probes by default. Override with ECOSYSTEM_REPOS or leave empty
+/// and use full directory discovery via ECOSYSTEM_ROOT + empty override
+/// is not available here; callers who want full scan must pass names
+/// or we keep an explicit critical set so the UI does not silently
+/// ignore first-class repos.
+const DEFAULT_REPOSITORIES: [&str; 18] = [
+    // observer + language core
     "ecosystem-observer",
     "my-lisp",
-    "cml",
-    "wsm-os",
     "fpga-lisp",
-    "tauricode",
-    "my-lisp-panini",
-    "shiva-sutras",
+    "cml",
+    // ABI / self-hosted WSM
+    "wsm-target-contract",
+    "wsm-my-lisp",
+    "wsm-os-lisp",
+    "wsm-os",
+    "wsm",
+    // product surface
+    "my-lisp-cyberpunk",
     "my-idea",
     "chess-lisp-zero",
+    // foundation / research
+    "pravda",
+    "my-lisp-panini",
+    "shiva-sutras",
+    "mccarthy-eval",
+    // legacy / optional still present on many machines
+    "tauricode",
+    "radio-log",
 ];
 
 fn home_dir(home: Option<&str>) -> PathBuf {
@@ -119,5 +140,27 @@ mod tests {
         let repositories = parse_repositories(Some(" , "));
         assert!(repositories.contains(&"ecosystem-observer".to_string()));
         assert!(repositories.contains(&"my-lisp".to_string()));
+    }
+
+    /// 2026-09-11: defaults must not silently drop first-class repos
+    /// from the post-surge ecosystem (cyberpunk surface, ABI contract,
+    /// self-hosted WSM line).
+    #[test]
+    fn defaults_include_post_surge_critical_repos() {
+        let repositories = parse_repositories(None);
+        for name in [
+            "my-lisp-cyberpunk",
+            "wsm-target-contract",
+            "wsm-my-lisp",
+            "wsm-os-lisp",
+            "pravda",
+            "cml",
+            "fpga-lisp",
+        ] {
+            assert!(
+                repositories.iter().any(|r| r == name),
+                "DEFAULT_REPOSITORIES missing critical repo: {name}"
+            );
+        }
     }
 }

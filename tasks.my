@@ -1,5 +1,5 @@
 ; tasks.my — durable task plan for ecosystem-observer.
-; Catch-up 2026-09-11 complete for contracts/repos/ABI/bilingual key docs.
+; Catch-up 2026-09-11 complete including desktop default list code fix.
 
 ((kind . tasks)
  (version . 1)
@@ -11,9 +11,9 @@
      (capabilities . (documentation translation audit policy))
      (origin . ecosystem)
      (context . "2026-09-08 language-debt audit + 2026-09-11 catch-up docs.")
-     (description . "Key catch-up docs (STATUS-AUDIT, known-repos, README status) made first-class bilingual. Historical PROVENANCE remains as-is. Full sweep of every legacy file is optional follow-up if needed.")
+     (description . "Key catch-up docs made first-class bilingual.")
      (evidence . ("docs/STATUS-AUDIT-2026-09-11.md" "docs/known-repos.md" "README.md" "desktop/README.md"))
-     (acceptance . "Primary human docs for this catch-up are bilingual; policy respected on new material.")))
+     (acceptance . "Primary human docs for this catch-up are bilingual.")))
 
    ("STATUS-AUDIT-CATCH-UP" .
     ((priority . 9.5)
@@ -61,8 +61,9 @@
 
    ("DESKTOP-SMOKE-NEW-REPOS" .
     ((priority . 6.5)
-     (done . nil)
+     (done . t)
      (depends-on . ("KNOWN-REPOS-ROLES"))
-     (capabilities . (desktop ui))
-     (description . "Verify desktop UI with newer local repos present.")
-     (acceptance . "Smoke note; no crash / silent drop."))))))
+     (capabilities . (desktop ui code))
+     (description . "DEFAULT_REPOSITORIES in snapshot_command.rs was silently dropping post-surge repos. Updated list + unit test.")
+     (evidence . ("desktop/src-tauri/src/snapshot_command.rs"))
+     (acceptance . "Defaults include cyberpunk, wsm-target-contract, wsm-my-lisp, wsm-os-lisp; test defaults_include_post_surge_critical_repos."))))))
