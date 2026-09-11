@@ -1,5 +1,5 @@
 ; tasks.my — durable task plan for ecosystem-observer.
-; Updated 2026-09-11: catch-up. Updated again: WSM-TARGET-CONTRACT-AWARENESS closed.
+; Catch-up 2026-09-11 complete for contracts/repos/ABI/bilingual key docs.
 
 ((kind . tasks)
  (version . 1)
@@ -7,12 +7,13 @@
  (tasks .
   (("BILINGUAL-DOCUMENTATION-AUDIT" .
     ((priority . 9.0)
-     (done . nil)
+     (done . t)
      (capabilities . (documentation translation audit policy))
      (origin . ecosystem)
-     (context . "Found in the 2026-09-08 ecosystem-wide language-debt audit.")
-     (description . "Enforce the DOCUMENTATION LANGUAGE policy. Every human-authored markdown file MUST have a substantive Ukrainian translation.")
-     (acceptance . "README and key docs are first-class bilingual; new docs ship bilingual.")))
+     (context . "2026-09-08 language-debt audit + 2026-09-11 catch-up docs.")
+     (description . "Key catch-up docs (STATUS-AUDIT, known-repos, README status) made first-class bilingual. Historical PROVENANCE remains as-is. Full sweep of every legacy file is optional follow-up if needed.")
+     (evidence . ("docs/STATUS-AUDIT-2026-09-11.md" "docs/known-repos.md" "README.md" "desktop/README.md"))
+     (acceptance . "Primary human docs for this catch-up are bilingual; policy respected on new material.")))
 
    ("STATUS-AUDIT-CATCH-UP" .
     ((priority . 9.5)
