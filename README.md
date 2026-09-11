@@ -40,11 +40,22 @@ Tauricode is **not** part of this app and is not modified by its development.
 
 ---
 
+## Status (2026-09-11)
+
+The core still works. The ecosystem moved faster than this repo after 8 September (language-contract **6.0**, `wsm-target-contract`, `my-lisp-cyberpunk`, expanded WSM self-hosted line). Honest lag assessment and catch-up tasks:
+
+- [`docs/STATUS-AUDIT-2026-09-11.md`](docs/STATUS-AUDIT-2026-09-11.md)
+- [`tasks.my`](tasks.my)
+
+---
+
 ## Українською
 
 Канонічний read-only observer екосистеми WSM. Збирає Git-стан, процеси, ідентичності та контрактні факти; зберігає provenance і невідомі стани. UI лише спостерігає, не керує.
 
 Код перенесено з `juv4uk/tauricode` через coordination repo зі збереженням походження — [`PROVENANCE.md`](PROVENANCE.md).
+
+**Статус 2026-09-11:** ядро працює, але після 8 вересня екосистема пішла вперед швидше (контракт 6.0, Cyberpunk-поверхня, ABI-контракт). Аудит відставання і задачі на підтягування — у `docs/STATUS-AUDIT-2026-09-11.md` та `tasks.my`.
 
 ---
 
