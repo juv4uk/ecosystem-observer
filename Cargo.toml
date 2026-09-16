@@ -3,7 +3,7 @@ name = "ecosystem-observer"
 version = "0.1.0"
 edition = "2021"
 publish = false
-license = "MIT"
+license-file = "LICENSE"
 repository = "https://github.com/juv4uk/ecosystem-observer"
 description = "Read-only observer core for the my-lisp ecosystem (Slice 1: repository/git discovery; Slice 2: local runtime + self-reported agent identity)."
 
