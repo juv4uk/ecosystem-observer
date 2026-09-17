@@ -34,11 +34,11 @@ tauricode/crates/ecosystem-observer/
 4. Distinctive identifiers `EcosystemSnapshot`, `IdentityStatus`,
    `detect_language_contract_drift` і `discover_ecosystem` мають нуль збігів
    у `upstream/dev`.
-5. Root OpenCode `LICENSE` у Tauricode був збережений незмінним; observer
-   переноситься під owner MIT з окремим notice для реально похідного фрагмента.
-6. Offline `cargo metadata` підтвердив MIT-compatible license expressions для
-   locked Rust dependencies; точний перелік містить
-   `THIRD-PARTY-NOTICES.md`.
+5. Root OpenCode `LICENSE` у Tauricode був збережений незмінним; observer як
+   owner-authored work поширюється під canonical [ВОЛЬНІСТЮ](LICENSE), з
+   окремим notice для реально похідного фрагмента.
+6. Offline `cargo metadata` зафіксував upstream license expressions для locked
+   Rust dependencies; точний перелік містить `THIRD-PARTY-NOTICES.md`.
 
 ## Усунений mixed fragment / Replaced mixed fragment
 
