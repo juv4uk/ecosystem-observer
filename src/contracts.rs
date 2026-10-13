@@ -40,7 +40,7 @@ fn as_integer(e: &Expr) -> Option<i64> {
 }
 
 fn as_symbol_or_string(e: &Expr) -> Option<&str> {
-    e.as_symbol().or_else(|| match e {
+    e.as_symbol().or(match e {
         Expr::String(s) => Some(s.as_str()),
         _ => None,
     })
