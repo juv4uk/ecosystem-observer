@@ -30,12 +30,7 @@ pub fn alternate_extension(ext: &str) -> Option<&'static str> {
 pub fn is_ecosystem_surface_ext(path: &Path) -> bool {
     path.extension()
         .and_then(|e| e.to_str())
-        .is_some_and(|e| {
-            matches!(
-                e,
-                "my" | "мій" | "wsm" | "всм" | "lisp" | "лісп"
-            )
-        })
+        .is_some_and(|e| matches!(e, "my" | "мій" | "wsm" | "всм" | "lisp" | "лісп"))
 }
 
 /// If `preferred` exists, return it. Else try the Cyrillic/Latin twin
@@ -87,10 +82,7 @@ mod tests {
 
     #[test]
     fn resolve_prefers_existing_latin_then_cyrillic_twin() {
-        let root = std::env::temp_dir().join(format!(
-            "eco-obs-surface-{}",
-            std::process::id()
-        ));
+        let root = std::env::temp_dir().join(format!("eco-obs-surface-{}", std::process::id()));
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(&root).unwrap();
 

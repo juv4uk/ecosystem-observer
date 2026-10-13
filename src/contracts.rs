@@ -40,11 +40,10 @@ fn as_integer(e: &Expr) -> Option<i64> {
 }
 
 fn as_symbol_or_string(e: &Expr) -> Option<&str> {
-    e.as_symbol()
-        .or_else(|| match e {
-            Expr::String(s) => Some(s.as_str()),
-            _ => None,
-        })
+    e.as_symbol().or_else(|| match e {
+        Expr::String(s) => Some(s.as_str()),
+        _ => None,
+    })
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -143,7 +142,9 @@ pub fn parse_wsm_target_contract_version(
     let version = alist_get(items, "version")
         .and_then(as_integer)
         .ok_or(ContractError::MissingField("version"))?;
-    let schema = alist_get(items, "schema").and_then(as_symbol_or_string).map(str::to_string);
+    let schema = alist_get(items, "schema")
+        .and_then(as_symbol_or_string)
+        .map(str::to_string);
     let architecture = alist_get(items, "architecture")
         .and_then(as_symbol_or_string)
         .map(str::to_string);
